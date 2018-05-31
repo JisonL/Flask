@@ -1,16 +1,18 @@
-from config import DevelopConfig
+from flask_script import Manager
+
 from app import create_app
-app = create_app(DevelopConfig)
+from config import DevelopConfig
+app=create_app(DevelopConfig)
+
+manager=Manager(app)
 
 from models import db
-
 db.init_app(app)
-from flask_script import Manager
-manager = Manager(app)
 
-from flask_migrate import Migrate, MigrateCommand
-Migrate(app, db)
-manager.add_command('db', MigrateCommand)
+from flask_migrate import Migrate,MigrateCommand
+Migrate(app,db)
+manager.add_command('db',MigrateCommand)
 
 if __name__ == '__main__':
+    # print(app.url_map)
     manager.run()

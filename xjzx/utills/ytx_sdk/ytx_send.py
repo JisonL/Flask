@@ -2,13 +2,13 @@ from .CCPRestSDK import REST
 # import ConfigParser
 
 # 主帐号
-accountSid = '8aaf0708635e4ce001638cb641691d9b'
+accountSid = '8a216da85f5c89b1015f994144201b06'
 
 # 主帐号Token
-accountToken = 'aeb5f0a5c6e1478faa5a7a4d403604cb'
+accountToken = '6ce3f903e23c418e8ef7e7d03704f591'
 
 # 应用Id
-appId = '8aaf0708635e4ce001638cb641c01da2'
+appId = '8a216da85f5c89b1015f994145a21b0d'
 
 # 请求地址，格式如下，不需要写http://
 serverIP = 'app.cloopen.com'
@@ -32,5 +32,4 @@ def sendTemplateSMS(to, datas, tempId):
     rest.setAppId(appId)
 
     result = rest.sendTemplateSMS(to, datas, tempId)
-    # 返回状态码
     return result.get('statusCode')

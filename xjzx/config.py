@@ -4,16 +4,14 @@ import os
 
 class Config(object):
     DEBUG = False
-    # 这里mysql只写一个模板样式
     SQLALCHEMY_DATABASE_URI = 'mysql://name:password@host:port/database'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-# redis配置
+    # redis配置
     REDIS_HOST = "localhost"
     REDIS_PORT = 6379
     REDIS_DB = 10
-
     # session
-    SECRET_KEY = "python"
+    SECRET_KEY = "itheima"
     # flask_session的配置信息
     SESSION_TYPE = "redis"  # 指定 session 保存到 redis 中
     SESSION_USE_SIGNER = True  # 让 cookie 中的 session_id 被加密签名处理
@@ -25,7 +23,6 @@ class Config(object):
     #os.path.abspath()==>获取文件的绝对路径，/home/python/Desktop/sz10_flask/xjzx/config.py
     #os.path.dirname()==>获取路径的目录名，/home/python/Desktop/sz10_flask/xjzx
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
     # 七牛云配置
     QINIU_AK = 'H999S3riCJGPiJOity1GsyWufw3IyoMB6goojo5e'
     QINIU_SK = 'uOZfRdFtljIw7b8jr6iTG-cC6wY_-N19466PXUAb'
@@ -33,7 +30,7 @@ class Config(object):
     QINIU_URL = 'http://oyvzbpqij.bkt.clouddn.com/'
 
 
-# 开发时配置
 class DevelopConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:hellopython@localhost:3306/my_pro'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@localhost:3306/xjzx10'
+
