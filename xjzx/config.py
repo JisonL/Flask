@@ -11,7 +11,7 @@ class Config(object):
     REDIS_PORT = 6379
     REDIS_DB = 10
     # session
-    SECRET_KEY = "itheima"
+    SECRET_KEY = "python"
     # flask_session的配置信息
     SESSION_TYPE = "redis"  # 指定 session 保存到 redis 中
     SESSION_USE_SIGNER = True  # 让 cookie 中的 session_id 被加密签名处理
@@ -32,5 +32,5 @@ class Config(object):
 
 class DevelopConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@localhost:3306/xjzx10'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:hellopython@localhost:3306/my_pro'
 

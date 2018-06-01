@@ -1,5 +1,6 @@
 from flask import Flask
 
+
 def create_app(config):
     app=Flask(__name__)
 
@@ -8,10 +9,6 @@ def create_app(config):
     #csrf保护
     from flask_wtf.csrf import CSRFProtect
     CSRFProtect(app)
-
-    #进行session存储
-    from flask_session import Session
-    Session(app)
 
     import logging
     from logging.handlers import RotatingFileHandler

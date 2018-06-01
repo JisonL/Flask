@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% include 'news/user_head.html' %}
+	{% include '/news/head.html' %}
     <link rel="stylesheet" type="text/css" href="/static/news/css/jquery.pagination.css">
 	<script type="text/javascript" src="/static/news/js/jquery.pagination.min.js"></script>
 </head>
@@ -9,12 +9,12 @@
     <div class="my_collect">
         <h3>我的收藏</h3>
         <ul class="article_list">
-            {% for news in news_list %}
-            <li>
-                <a href="/{{ news.id }}">{{ news.title }}</a>
-                <span>{{ news.update_time }}</span>
-            </li>
-            {% endfor %}
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
         </ul>
 
 
@@ -23,10 +23,10 @@
         <script>
             $(function() {
                 $("#pagination").pagination({
-                    currentPage: {{ page }},
-                    totalPage: {{ total_page }},
+                    currentPage: 2,
+                    totalPage: 3,
                     callback: function(current) {
-                        location.href='?page='+current;
+                        alert('ok!');
                     }
                 });
             });
