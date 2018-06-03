@@ -9,9 +9,9 @@ db=SQLAlchemy()
 
 from datetime import datetime
 class BaseModel(object):
-    create_time=db.Column(db.DateTime,default=datetime.now())
-    update_time=db.Column(db.DateTime,default=datetime.now())
-    isDelete=db.Column(db.Boolean,default=False)
+    create_time=db.Column(db.DateTime, default=datetime.now)
+    update_time=db.Column(db.DateTime, default=datetime.now)
+    isDelete=db.Column(db.Boolean, default=False)
 
 tb_news_collect = db.Table(
     'tb_news_collect',
@@ -41,7 +41,7 @@ class NewsInfo(db.Model, BaseModel):
     __tablename__ = 'news_info'
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey('news_category.id'))
-    pic = db.Column(db.String(50))
+    pic = db.Column(db.String(50), default='')
     title = db.Column(db.String(30))
     summary = db.Column(db.String(200))
     content = db.Column(db.Text)
@@ -52,9 +52,12 @@ class NewsInfo(db.Model, BaseModel):
     reason=db.Column(db.String(100),default='')
     comments = db.relationship('NewsComment', backref='news', lazy='dynamic', order_by='NewsComment.id.desc()')
 
-    # @property
-    # def pic_url(self):
-    #     return current_app.config.get('QINIU_URL') + self.pic
+    @property
+    def pic_url(self):
+        if self.pic:
+            return '/static/news/images/' + self.pic
+        else:
+            return '/static/news/images/'
     #
     # def to_index_dict(self):
     #     return {

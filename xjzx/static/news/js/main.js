@@ -126,7 +126,7 @@ $(function(){
                 //将右上角的用户信息展示出来，并隐藏登录注册div
                 $('.user_btns').hide();
                 $('.user_login').show();
-                $('.lgin_pic').attr('src','/static/news/images/'+data.avatar);
+                $('.lgin_pic').attr('src',data.avatar_url);
                 $('#nick_name').text(data.nick_name);
             }
         });

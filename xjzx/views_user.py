@@ -1,10 +1,14 @@
+import re
+
 from flask import Blueprint, make_response, jsonify
 from flask import current_app
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import session
-from models import db, UserInfo
+from models import db, UserInfo,NewsInfo,NewsCategory
+
+
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 
@@ -116,7 +120,7 @@ def login():
             # 状态保持
             session['user_id'] = user.id
             # 返回成功的结果
-            return jsonify(result=4, avatar=user.avatar, nick_name=user.nick_name)
+            return jsonify(result=4, avatar=user.avatar_url, nick_name=user.nick_name)
         else:
             # 密码错误
             return jsonify(result=3)
@@ -138,24 +142,30 @@ def show():
     else:
         return 'no'
 
+
 @user_blueprint.route('/')
 def index():
     user_id = session['user_id']
     user = UserInfo.query.get(user_id)
 
-    return render_template('news/user.html',user=user)
+    return render_template('news/user.html', user=user)
+
 
 import functools
+
+
 def f1(f):
     @functools.wraps(f)
-    def f2(*args,**kwargs):
+    def f2(*args, **kwargs):
         if 'user_id' in session:
-            return f(*args,**kwargs)
+            return f(*args, **kwargs)
         else:
             return redirect('/')
+
     return f2
 
-@user_blueprint.route('/base',methods=['GET','POST'])
+
+@user_blueprint.route('/base', methods=['GET', 'POST'])
 @f1
 def base():
     user_id = session['user_id']
@@ -169,39 +179,167 @@ def base():
         gender = dict1.get('gender')
         user.signature = signature
         user.nick_name = nick_name
-        user.gender = bool(gender)
+        if gender == 'True':
+            user.gender = True
+        else:
+            user.gender = False
         # 提交数据库
         db.session.commit()
         # 返回响应
         return jsonify(result=1)
 
 
-@user_blueprint.route('/pic')
+@user_blueprint.route('/pic', methods=['POST', 'GET'])
 @f1
 def pic():
-    return render_template('news/user_pic_info.html')
+    user_id = session['user_id']
+    user = UserInfo.query.get(user_id)
+    if request.method == 'GET':
+        return render_template('news/user_pic_info.html', user=user)
+    elif request.method == 'POST':
+        img = request.files.get('avatar')
+        # print(img)
+        # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        # img.save(BASE_DIR + '/static/news/head/%d.jpg' % (user_id))
+        user.avatar = img.filename
+        db.session.commit()
+        return jsonify(result=1, avatar=user.avatar_url)
+
 
 @user_blueprint.route('/follow')
 @f1
 def follow():
-    return render_template('news/user_follow.html')
+    user_id = session['user_id']
+    user = UserInfo.query.get(user_id)
+    page = int(request.args.get('page', '1'))
 
-@user_blueprint.route('/pwd')
-@f1
-def pwd():
-    return render_template('news/user_pass_info.html')
+    pagination = user.follow_user.paginate(page, 4, False)
+    total_page = pagination.pages
+    fol_list = pagination.items
+
+    return render_template('news/user_follow.html', fol_list=fol_list, total_page=total_page, page=page)
+
 
 @user_blueprint.route('/collect')
 @f1
 def collect():
-    return render_template('news/user_collection.html')
+    user_id = session['user_id']
+    user = UserInfo.query.get(user_id)
+    page = int(request.args.get('page', '1'))
 
-@user_blueprint.route('/release')
+    pagination = user.news_collect.paginate(page, 5, False)
+    total_page = pagination.pages
+    news_list = pagination.items
+    return render_template('news/user_collection.html',news_list=news_list, total_page=total_page, page=page)
+
+
+@user_blueprint.route('/pwd',methods=['GET', 'POST'])
 @f1
-def release():
-    return render_template('news/user_news_release.html')
+def pwd():
+    user_id = session['user_id']
+    user = UserInfo.query.get(user_id)
+
+    if request.method == 'GET':
+        return render_template('news/user_pass_info.html')
+
+    elif request.method == 'POST':
+        current_psw = request.form.get('current_psw')
+        new_psw = request.form.get('new_psw')
+        conf_psw = request.form.get('conf_psw')
+
+        # 进行数据判别
+        if not all([current_psw,new_psw,conf_psw]):
+            return render_template('news/user_pass_info.html',msg='请将信息填写完成')
+        if new_psw == conf_psw:
+            if not re.match(r'[0-9a-zA-Z]{6,20}',new_psw):
+                return render_template('news/user_pass_info.html', msg='密码格式不正确')
+        else:
+            return render_template('news/user_pass_info.html',msg='两次密码不一致')
+
+        # 查询数据库密码并进行对比
+        if user.check_pwd(current_psw):
+            return render_template('news/user_pass_info.html', msg='当前密码错误')
+
+        user.password = new_psw
+        db.session.commit()
+        return render_template('news/user_pass_info.html')
+
 
 @user_blueprint.route('/newslist')
 @f1
 def newslist():
-    return render_template('news/user_news_list.html')
+    user_id = session['user_id']
+    user = UserInfo.query.get(user_id)
+    page = int(request.args.get('page', '1'))
+
+    pagination = user.news.order_by(NewsInfo.update_time.desc()).paginate(page, 6, False)
+    total_page = pagination.pages
+    news_list = pagination.items
+    # print(news_list)
+
+    return render_template('news/user_news_list.html',news_list=news_list, total_page=total_page, page=page)
+
+
+@user_blueprint.route('/release', methods=['GET', 'POST'])
+@f1
+def release():
+    category_list = NewsCategory.query.all()
+    if request.method == 'GET':
+        return render_template('news/user_news_release.html', category_list=category_list)
+    elif request.method == 'POST':
+        # 接收用户输入的数据
+        dict1 = request.form
+        title = dict1.get('title')
+        category_id = int(dict1.get('category'))
+        summary = dict1.get('summary')
+        content = dict1.get('content')
+        # 接收文件
+        news_pic = request.files.get('pic')
+
+        if not all([title,category_id,summary,content]):
+            return render_template('news/user_news_release.html', category_list=category_list,msg='数据不能为空')
+        news = NewsInfo()
+        news.pic = news_pic.filename
+        news.title = title
+        news.category_id = category_id
+        news.summary=summary
+        news.content=content
+        news.user_id = session['user_id']
+
+        db.session.add(news)
+        db.session.commit()
+        # 提交完转到文章列表
+        return redirect('/user/newslist')
+
+
+@user_blueprint.route('/modify/<int:news_id>', methods=['GET', 'POST'])
+def modify(news_id):
+    news = NewsInfo.query.get(news_id)
+    category_list = NewsCategory.query.all()
+    if request.method == 'GET':
+        return render_template('news/news_update.html', category_list=category_list,news=news)
+    elif request.method == 'POST':
+        # 接收用户输入的数据
+        dict1 = request.form
+        title = dict1.get('title')
+        category_id = int(dict1.get('category'))
+        summary = dict1.get('summary')
+        content = dict1.get('content')
+        # 接收文件
+        news_pic = request.files.get('pic')
+
+        if not all([title, category_id, summary, content]):
+            return render_template('news/user_news_release.html', category_list=category_list, msg='数据不能为空')
+        news = NewsInfo()
+
+        news.pic = news_pic.filename
+        news.title = title
+        news.category_id = category_id
+        news.summary = summary
+        news.content = content
+        news.user_id = session['user_id']
+        db.session.commit()
+        # 提交完转到文章列表
+        return redirect('/user/newslist')
+
+
